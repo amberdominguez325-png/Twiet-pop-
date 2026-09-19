@@ -1,34 +1,33 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Rubik Snake Kinematic Test</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#eef0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:82px;background:#fffffff0;padding:14px 18px}h1{margin:0;font-size:22px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:82px 0 0;width:100%;height:calc(100% - 82px);touch-action:none}.bar{position:fixed;z-index:6;bottom:22px;left:14px;right:14px;display:flex;gap:8px}.bar button{flex:1;border:0;background:white;border-radius:15px;padding:12px 6px;font-weight:800;box-shadow:0 4px 16px #0002}.bar button.on{background:#182028;color:white}.tip{position:fixed;z-index:6;top:98px;left:18px;right:18px;text-align:center;background:#fff;border-radius:16px;padding:10px;font-size:13px}</style></head><body><header><h1>真实链结构测试</h1><div class="sub">24 个楔形棱柱 · 父子关节递推 · 不再从矩形反推</div></header><div class="tip">先看“直线”：每一节都是独立实体；再切换“折叠测试”看关节后整条是否一起运动</div><canvas id="c"></canvas><div class="bar"><button id="straight" class="on">直线</button><button id="fold">折叠测试</button><button id="packed">收拢预设</button></div><script type="module">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake 3-unit Test</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#eef0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:22px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:100px;left:18px;right:18px;background:white;border-radius:16px;padding:10px 12px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:22px;left:16px;right:16px;display:flex;gap:9px}.bar button{flex:1;border:0;border-radius:16px;padding:13px 6px;background:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 16px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>3 节实物结构验证</h1><div class="sub">按你刚拍的两张照片：直线连续长条 / 转动后露出方形端面</div></header><div class="note" id="note">直线：三节侧面应该连续成一条，蓝白三角交替</div><canvas id="c"></canvas><div class="bar"><button id="s" class="on">直线</button><button id="f">折 90°</button><button id="r">另一面</button></div><script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 const cv=document.querySelector('#c'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.outputColorSpace=THREE.SRGBColorSpace;
-const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(35,1,.1,120);cam.position.set(9,7,13);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x7b8389,2.4));let dl=new THREE.DirectionalLight(0xffffff,3);dl.position.set(5,9,7);dl.castShadow=true;sc.add(dl);
-let floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0xe5e4e0,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.4;floor.receiveShadow=true;sc.add(floor);
-const blue=new THREE.MeshPhysicalMaterial({color:0x16349f,roughness:.3,clearcoat:.25}),ivory=new THREE.MeshPhysicalMaterial({color:0xf4f1e7,roughness:.4,clearcoat:.12});
-/* A module is a triangular prism whose two rectangular side faces and diagonal face are all real geometry.
-   Local chain enters at hinge A and exits at hinge B. Each next pivot is parented to the previous exit,
-   so rotating any pivot automatically carries every downstream module. */
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,.1,100);cam.position.set(5.8,4.8,8);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x77818a,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(4,8,6);dl.castShadow=true;sc.add(dl);
+let floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0xe4e3df,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.3;floor.receiveShadow=true;sc.add(floor);
+const blue=new THREE.MeshPhysicalMaterial({color:0x17359e,roughness:.28,clearcoat:.28}),white=new THREE.MeshPhysicalMaterial({color:0xf5f2e8,roughness:.4,clearcoat:.13});
+/* Reference-driven module:
+   a right triangular prism. Its square rectangular side (L x D) is the face seen in the user's bent photo;
+   its triangular side is the blue/white triangle seen in the straight side photo.
+   Chain pivots sit at the acute tip; child transform is attached at exactly the same point, so no gap. */
 function prism(){
- const L=1.12,H=1.12,D=1.12;
- const v=[0,-H/2,-D/2, 0,H/2,-D/2, L,-H/2,-D/2, 0,-H/2,D/2, 0,H/2,D/2, L,-H/2,D/2];
- const id=[0,2,1,3,4,5,0,3,5,0,5,2,0,1,4,0,4,3,1,2,5,1,5,4];
+ const L=1.55,H=1.55,D=.78;
+ const v=[0,-H/2,-D/2,0,H/2,-D/2,L,-H/2,-D/2,0,-H/2,D/2,0,H/2,D/2,L,-H/2,D/2];
+ const id=[0,1,2,3,5,4,0,3,4,0,4,1,0,2,5,0,5,3,1,4,5,1,5,2];
  let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g;
 }
-const G=prism(),world=new THREE.Group();sc.add(world);let pivots=[],meshes=[];let parent=world;
-for(let i=0;i<24;i++){
- let pivot=new THREE.Group();parent.add(pivot);pivots.push(pivot);
- let m=new THREE.Mesh(G,i%2?ivory:blue);m.castShadow=true;m.receiveShadow=true;
- // alternate the prism orientation around the chain axis; this is the physical alternating wedge rhythm
- if(i%2)m.rotation.x=Math.PI;
- pivot.add(m);meshes.push(m);
- let next=new THREE.Group();next.position.x=1.12;pivot.add(next);parent=next;
+const G=prism(),root=new THREE.Group();sc.add(root);
+let piv=[],mods=[],parent=root;
+for(let i=0;i<3;i++){
+ let p=new THREE.Group();parent.add(p);piv.push(p);
+ let m=new THREE.Mesh(G,i%2?white:blue);m.castShadow=true;m.receiveShadow=true;
+ // alternating 180° about the chain axis makes the visible triangular faces alternate while the outer strip stays straight
+ if(i%2)m.rotation.x=Math.PI;p.add(m);mods.push(m);
+ let socket=new THREE.Group();socket.position.x=1.55;p.add(socket);parent=socket;
 }
-function zero(){pivots.forEach(p=>p.rotation.set(0,0,0));world.rotation.set(-.12,-.28,.03);world.position.set(-12.8,0,0)}
-function preset(type){zero();if(type==='fold'){pivots[7].rotation.x=Math.PI/2;pivots[12].rotation.x=-Math.PI/2;pivots[16].rotation.x=Math.PI/2;world.position.set(-5.8,0,0)}
- if(type==='packed'){// joint-angle preset; geometry remains the same 24-node chain
-  const seq=[0,1,1,3,1,1,3,1,1,3,1,1,3,1,1,3,1,1,3,1,1,3,1,0];
-  pivots.forEach((p,i)=>p.rotation.x=seq[i]*Math.PI/2);world.position.set(-1.8,1.1,0);world.rotation.set(-.2,-.55,.05)}
-}
-preset('straight');
-document.querySelector('#straight').onclick=()=>{preset('straight');sel('straight')};document.querySelector('#fold').onclick=()=>{preset('fold');sel('fold')};document.querySelector('#packed').onclick=()=>{preset('packed');sel('packed')};function sel(id){document.querySelectorAll('.bar button').forEach(b=>b.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
-function resize(){let w=innerWidth,h=innerHeight-82;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;world.rotation.y+=(e.clientX-lx)*.008;world.rotation.z+=(e.clientY-ly)*.005;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
+root.position.x=-2.3;root.rotation.set(-.12,-.25,.04);
+function straight(){piv.forEach(p=>p.rotation.set(0,0,0));root.position.set(-2.3,0,0);document.querySelector('#note').textContent='直线：三节侧面应该连续成一条，蓝白三角交替';sel('s')}
+function fold(){straight();piv[1].rotation.x=Math.PI/2;piv[2].rotation.x=-Math.PI/2;root.position.set(-1.8,.2,0);document.querySelector('#note').textContent='折叠：连接处不应分离；旋转后应该能看到完整矩形/方形侧面';sel('f')}
+function reverse(){fold();root.rotation.y+=Math.PI/2;document.querySelector('#note').textContent='换一个方向看端面与接缝';sel('r')}
+function sel(id){document.querySelectorAll('.bar button').forEach(b=>b.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
+document.querySelector('#s').onclick=straight;document.querySelector('#f').onclick=fold;document.querySelector('#r').onclick=reverse;straight();
+function resize(){let w=innerWidth,h=innerHeight-84;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.009;root.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
 </script></body></html>
