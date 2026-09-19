@@ -1,33 +1,32 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake 3-unit Test</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#eef0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:22px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:100px;left:18px;right:18px;background:white;border-radius:16px;padding:10px 12px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:22px;left:16px;right:16px;display:flex;gap:9px}.bar button{flex:1;border:0;border-radius:16px;padding:13px 6px;background:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 16px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>3 节实物结构验证</h1><div class="sub">按你刚拍的两张照片：直线连续长条 / 转动后露出方形端面</div></header><div class="note" id="note">直线：三节侧面应该连续成一条，蓝白三角交替</div><canvas id="c"></canvas><div class="bar"><button id="s" class="on">直线</button><button id="f">折 90°</button><button id="r">另一面</button></div><script type="module">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Face Joint Test</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#eef0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:22px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:100px;left:18px;right:18px;background:#fff;border-radius:16px;padding:10px 12px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:22px;left:16px;right:16px;display:flex;gap:9px}.bar button{flex:1;border:0;border-radius:16px;padding:13px 5px;background:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 16px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>3 节 · 面对面关节验证</h1><div class="sub">连接不是边或尖点：两个完整方形面重合，绕面中心法线旋转</div></header><div class="note" id="note">0°：连接面完全贴合</div><canvas id="c"></canvas><div class="bar"><button id="a" class="on">0°</button><button id="b">90°</button><button id="d">180°</button><button id="e">270°</button></div><script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 const cv=document.querySelector('#c'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.outputColorSpace=THREE.SRGBColorSpace;
-const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,.1,100);cam.position.set(5.8,4.8,8);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x77818a,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(4,8,6);dl.castShadow=true;sc.add(dl);
-let floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0xe4e3df,roughness:.92}));floor.rotation.x=-Math.PI/2;floor.position.y=-2.3;floor.receiveShadow=true;sc.add(floor);
-const blue=new THREE.MeshPhysicalMaterial({color:0x17359e,roughness:.28,clearcoat:.28}),white=new THREE.MeshPhysicalMaterial({color:0xf5f2e8,roughness:.4,clearcoat:.13});
-/* Reference-driven module:
-   a right triangular prism. Its square rectangular side (L x D) is the face seen in the user's bent photo;
-   its triangular side is the blue/white triangle seen in the straight side photo.
-   Chain pivots sit at the acute tip; child transform is attached at exactly the same point, so no gap. */
-function prism(){
- const L=1.55,H=1.55,D=.78;
- const v=[0,-H/2,-D/2,0,H/2,-D/2,L,-H/2,-D/2,0,-H/2,D/2,0,H/2,D/2,L,-H/2,D/2];
- const id=[0,1,2,3,5,4,0,3,4,0,4,1,0,2,5,0,5,3,1,4,5,1,5,2];
- let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g;
-}
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(33,1,.1,100);cam.position.set(6.8,5.4,8.5);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x78828a,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(5,8,6);dl.castShadow=true;sc.add(dl);
+let fl=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0xe5e4e0,roughness:.92}));fl.rotation.x=-Math.PI/2;fl.position.y=-2.6;fl.receiveShadow=true;sc.add(fl);
+const blue=new THREE.MeshPhysicalMaterial({color:0x17379f,roughness:.29,clearcoat:.25}),white=new THREE.MeshPhysicalMaterial({color:0xf4f1e9,roughness:.4,clearcoat:.12}),faceMat=new THREE.MeshStandardMaterial({color:0xffcf3e,transparent:true,opacity:.25,side:THREE.DoubleSide});
+/* A module is a right triangular prism extruded along Z.
+   Its TWO square rectangular faces are the connection faces:
+   face A lies in y=-s/2, face B is the diagonal rectangle.
+   To connect modules, we construct transforms from face frames, not tip points.
+   Child face A is coincident with parent face B; rotation happens about B's normal through its center. */
+const s=1.55,depth=1.55;
+function prism(){let v=[-s/2,-s/2,-depth/2,-s/2,s/2,-depth/2,s/2,-s/2,-depth/2,-s/2,-s/2,depth/2,-s/2,s/2,depth/2,s/2,-s/2,depth/2],id=[0,1,2,3,5,4,0,3,4,0,4,1,0,2,5,0,5,3,1,4,5,1,5,2];let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g}
 const G=prism(),root=new THREE.Group();sc.add(root);
-let piv=[],mods=[],parent=root;
-for(let i=0;i<3;i++){
- let p=new THREE.Group();parent.add(p);piv.push(p);
- let m=new THREE.Mesh(G,i%2?white:blue);m.castShadow=true;m.receiveShadow=true;
- // alternating 180° about the chain axis makes the visible triangular faces alternate while the outer strip stays straight
- if(i%2)m.rotation.x=Math.PI;p.add(m);mods.push(m);
- let socket=new THREE.Group();socket.position.x=1.55;p.add(socket);parent=socket;
-}
-root.position.x=-2.3;root.rotation.set(-.12,-.25,.04);
-function straight(){piv.forEach(p=>p.rotation.set(0,0,0));root.position.set(-2.3,0,0);document.querySelector('#note').textContent='直线：三节侧面应该连续成一条，蓝白三角交替';sel('s')}
-function fold(){straight();piv[1].rotation.x=Math.PI/2;piv[2].rotation.x=-Math.PI/2;root.position.set(-1.8,.2,0);document.querySelector('#note').textContent='折叠：连接处不应分离；旋转后应该能看到完整矩形/方形侧面';sel('f')}
-function reverse(){fold();root.rotation.y+=Math.PI/2;document.querySelector('#note').textContent='换一个方向看端面与接缝';sel('r')}
-function sel(id){document.querySelectorAll('.bar button').forEach(b=>b.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
-document.querySelector('#s').onclick=straight;document.querySelector('#f').onclick=fold;document.querySelector('#r').onclick=reverse;straight();
+function module(mat){let g=new THREE.Group(),m=new THREE.Mesh(G,mat);m.castShadow=true;m.receiveShadow=true;g.add(m);return g}
+const m0=module(blue),j1=new THREE.Group(),m1=module(white),j2=new THREE.Group(),m2=module(blue);root.add(m0);root.add(j1);j1.add(m1);j1.add(j2);j2.add(m2);
+/* Parent diagonal face B has center (0,0,0), normal (1,1,0)/sqrt2 in module coordinates.
+   Child bottom square face A center is (0,-s/2,0), normal (0,-1,0).
+   Rotate child so its A normal opposes B normal, then translate A center exactly onto B center.
+   This guarantees full-face coincidence. */
+const qAlign=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,-1,0),new THREE.Vector3(-1,-1,0).normalize());
+function placeJoint(j){j.position.set(0,0,0);j.quaternion.copy(qAlign);let localCenter=new THREE.Vector3(0,-s/2,0).applyQuaternion(j.quaternion);j.position.sub(localCenter)}
+placeJoint(j1);
+/* second joint is built in module-1 local frame by same face-to-face rule */
+j2.position.set(0,0,0);j2.quaternion.copy(qAlign);let cc=new THREE.Vector3(0,-s/2,0).applyQuaternion(j2.quaternion);j2.position.sub(cc);
+// visual translucent square at first mating face for debugging
+let face=new THREE.Mesh(new THREE.PlaneGeometry(depth,s*Math.SQRT2),faceMat);face.rotation.y=Math.PI/2;face.rotation.x=Math.PI/4;root.add(face);
+root.rotation.set(-.2,-.45,.05);root.position.set(-.5,0,0);
+function setAng(k,id){j1.rotation.z=k*Math.PI/2;j2.rotation.z=0;document.querySelector('#note').textContent=(k*90)+'°：黄色半透明面是关节面；两节应始终整面贴合，只绕面心转';document.querySelectorAll('.bar button').forEach(x=>x.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
+document.querySelector('#a').onclick=()=>setAng(0,'a');document.querySelector('#b').onclick=()=>setAng(1,'b');document.querySelector('#d').onclick=()=>setAng(2,'d');document.querySelector('#e').onclick=()=>setAng(3,'e');
 function resize(){let w=innerWidth,h=innerHeight-84;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.009;root.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
 </script></body></html>
