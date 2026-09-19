@@ -1,0 +1,52 @@
+// Digit sequences adapted from Øistein Holen's Rubik's Snake pattern library.
+// In this notation 0/1/2/3 mean 0/+90/180/-90 degrees for each piece.
+// https://www.oisteinholen.no/rubik/snake.html
+export const DEFAULT_FORMULA = '010302010301020301020301'
+
+export const SHAPE_PRESETS = [
+  {
+    id: 'ball-24',
+    name: '24 段 · 球形',
+    nameEn: '24-piece · Ball',
+    pieceCount: 24,
+    formula: '2- 3- 4+ 6+ 7+ 5- 8- 9+ 11- 10- 12+ 14+ 15+ 13- 16- 17+ 19- 20+ 21- 18- 23+ 24- 22+',
+  },
+  { id: 'basket-24', name: '24 段 · 篮子', nameEn: '24-piece · Basket', pieceCount: 24, formula: '032002101101200232120021' },
+  { id: 'bird-24', name: '24 段 · 小鸟', nameEn: '24-piece · Bird', pieceCount: 24, formula: '020220001112310132111200' },
+  { id: 'cat-24', name: '24 段 · 猫', nameEn: '24-piece · Cat', pieceCount: 24, formula: '002202201022022022000000' },
+  { id: 'cobra-24', name: '24 段 · 眼镜蛇', nameEn: '24-piece · Cobra', pieceCount: 24, formula: '003031233213010000200002' },
+  { id: 'dog-24', name: '24 段 · 小狗', nameEn: '24-piece · Dog', pieceCount: 24, formula: '000002202002022000202202' },
+  { id: 'duck-24', name: '24 段 · 鸭子', nameEn: '24-piece · Duck', pieceCount: 24, formula: '022000101003210012300101' },
+  { id: 'elephant-24', name: '24 段 · 大象', nameEn: '24-piece · Elephant', pieceCount: 24, formula: '001013211231010220220220' },
+  { id: 'penguin-24', name: '24 段 · 企鹅', nameEn: '24-piece · Penguin', pieceCount: 24, formula: '002202203233313113133102' },
+  { id: 'swan-24', name: '24 段 · 天鹅', nameEn: '24-piece · Swan', pieceCount: 24, formula: '022021301230303032103122' },
+  { id: 'turtle-24', name: '24 段 · 乌龟', nameEn: '24-piece · Turtle', pieceCount: 24, formula: '003100312331311211131333' },
+  { id: 'zigzag-36', name: '36 段 · 螺旋折线', nameEn: '36-piece · Spiral zigzag', pieceCount: 36, formula: '001001001001001001001001001001001001' },
+  { id: 'double-ball-48', name: '48 段 · 双球', nameEn: '48-piece · Double ball', pieceCount: 48, formula: '033133131131331311313313333133131131331311313313' },
+  { id: 'coffee-cup-48', name: '48 段 · 咖啡杯', nameEn: '48-piece · Coffee cup', pieceCount: 48, formula: '002002110020012300200311022022011300200321002001' },
+  { id: 'flower-48', name: '48 段 · 花', nameEn: '48-piece · Flower', pieceCount: 48, formula: '013323121323102203121323121111213231211112132312' },
+  { id: 'knot-48', name: '48 段 · 绳结', nameEn: '48-piece · Knot', pieceCount: 48, formula: '033022011110220333302201111022033330220111102203' },
+  { id: 'maracas-48', name: '48 段 · 沙锤', nameEn: '48-piece · Maracas', pieceCount: 48, formula: '031100313003130011100000220000011100313003130011' },
+  { id: 'octahedron-48', name: '48 段 · 八面体', nameEn: '48-piece · Octahedron', pieceCount: 48, formula: '000310031001300130031003100130013003100310013001' },
+  { id: 'stone-48', name: '48 段 · 石头', nameEn: '48-piece · Stone', pieceCount: 48, formula: '023313113133131123101321101303123311331311313321' },
+  { id: 'straight-48', name: '48 段 · 直尺', nameEn: '48-piece · Straight', pieceCount: 48, formula: '000000000000000000000000000000000000000000000000' },
+  { id: 'star-48', name: '48 段 · 五角星', nameEn: '48-piece · Star', pieceCount: 48, formula: '013022013310220311302201331022031130220133102203' },
+  { id: 'star-2-48', name: '48 段 · 五角星 2', nameEn: '48-piece · Star 2', pieceCount: 48, formula: '002201133022033110220113302203311022011330220331' },
+  { id: 'starfish-48', name: '48 段 · 海星', nameEn: '48-piece · Starfish', pieceCount: 48, formula: '010220111313330220130220310220130220310220333131' },
+  { id: 'symmetry-48', name: '48 段 · 对称造型', nameEn: '48-piece · Symmetry', pieceCount: 48, formula: '020130013001133022013001133001300130220113300130' },
+  { id: 'barbell-72', name: '72 段 · 杠铃', nameEn: '72-piece · Barbell', pieceCount: 72, formula: '011131331311313313113133300000000000000000000000333131131331311313313111' },
+  { id: 'camel-72', name: '72 段 · 骆驼', nameEn: '72-piece · Camel', pieceCount: 72, formula: '011131102201131113331330220331331133133022033133333313302203313330020002' },
+  { id: 'coffin-72', name: '72 段 · 棺材', nameEn: '72-piece · Coffin', pieceCount: 72, formula: '031100000000313000000003130000000011331100000000313000000003130000000011' },
+  { id: 'filled-octahedron-72', name: '72 段 · 实心八面体', nameEn: '72-piece · Filled octahedron', pieceCount: 72, formula: '013133131131331311313332130031003100130013003100310013001300310031001321' },
+  {
+    id: 'hammer-72',
+    name: '72 段 · 锤子',
+    nameEn: '72-piece · Hammer',
+    pieceCount: 72,
+    formula: '032331311313313112310132110130312331133131131332300000000000220000000000',
+  },
+  { id: 'octahedron-72', name: '72 段 · 八面体', nameEn: '72-piece · Octahedron', pieceCount: 72, formula: '000003100003100001300001300003100003100001300001300003100003100001300001' },
+  { id: 'truncated-tetrahedron-72', name: '72 段 · 截角四面体', nameEn: '72-piece · Truncated tetrahedron', pieceCount: 72, formula: '010030010030010013003022010030010013003001003001003022010013003001003022' },
+  { id: 'tetrahedron-72', name: '72 段 · 四面体', nameEn: '72-piece · Tetrahedron', pieceCount: 72, formula: '020001300001300001133000220001300001133000013000013000220001133000013000' },
+  { id: 'tipi-72', name: '72 段 · 帐篷', nameEn: '72-piece · Tipi', pieceCount: 72, formula: '033000002200000111102203333000002200000111102203333000002200000111102203' },
+] as const
