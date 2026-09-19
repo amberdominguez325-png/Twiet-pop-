@@ -1,32 +1,56 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Face Joint Test</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#eef0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:22px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:100px;left:18px;right:18px;background:#fff;border-radius:16px;padding:10px 12px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:22px;left:16px;right:16px;display:flex;gap:9px}.bar button{flex:1;border:0;border-radius:16px;padding:13px 5px;background:#fff;font-size:14px;font-weight:800;box-shadow:0 4px 16px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>3 节 · 面对面关节验证</h1><div class="sub">连接不是边或尖点：两个完整方形面重合，绕面中心法线旋转</div></header><div class="note" id="note">0°：连接面完全贴合</div><canvas id="c"></canvas><div class="bar"><button id="a" class="on">0°</button><button id="b">90°</button><button id="d">180°</button><button id="e">270°</button></div><script type="module">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake Correct Geometry</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#edf0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:21px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:99px;left:16px;right:16px;background:#fff;border-radius:16px;padding:10px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:20px;left:14px;right:14px;display:flex;gap:7px}.bar button{flex:1;border:0;border-radius:15px;padding:12px 4px;background:#fff;font-weight:800;box-shadow:0 4px 15px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>标准 Magic Snake 几何验证</h1><div class="sub">半立方体单元 · 两个互相垂直的正方形 leg faces · 面心 pin 连接</div></header><div class="note" id="note">直线：24 个半立方体通过正方形面首尾相接</div><canvas id="c"></canvas><div class="bar"><button id="s" class="on">直线</button><button id="j">拧第 8 节</button><button id="v">看连接面</button></div><script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 const cv=document.querySelector('#c'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.outputColorSpace=THREE.SRGBColorSpace;
-const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(33,1,.1,100);cam.position.set(6.8,5.4,8.5);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x78828a,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(5,8,6);dl.castShadow=true;sc.add(dl);
-let fl=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0xe5e4e0,roughness:.92}));fl.rotation.x=-Math.PI/2;fl.position.y=-2.6;fl.receiveShadow=true;sc.add(fl);
-const blue=new THREE.MeshPhysicalMaterial({color:0x17379f,roughness:.29,clearcoat:.25}),white=new THREE.MeshPhysicalMaterial({color:0xf4f1e9,roughness:.4,clearcoat:.12}),faceMat=new THREE.MeshStandardMaterial({color:0xffcf3e,transparent:true,opacity:.25,side:THREE.DoubleSide});
-/* A module is a right triangular prism extruded along Z.
-   Its TWO square rectangular faces are the connection faces:
-   face A lies in y=-s/2, face B is the diagonal rectangle.
-   To connect modules, we construct transforms from face frames, not tip points.
-   Child face A is coincident with parent face B; rotation happens about B's normal through its center. */
-const s=1.55,depth=1.55;
-function prism(){let v=[-s/2,-s/2,-depth/2,-s/2,s/2,-depth/2,s/2,-s/2,-depth/2,-s/2,-s/2,depth/2,-s/2,s/2,depth/2,s/2,-s/2,depth/2],id=[0,1,2,3,5,4,0,3,4,0,4,1,0,2,5,0,5,3,1,4,5,1,5,2];let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g}
-const G=prism(),root=new THREE.Group();sc.add(root);
-function module(mat){let g=new THREE.Group(),m=new THREE.Mesh(G,mat);m.castShadow=true;m.receiveShadow=true;g.add(m);return g}
-const m0=module(blue),j1=new THREE.Group(),m1=module(white),j2=new THREE.Group(),m2=module(blue);root.add(m0);root.add(j1);j1.add(m1);j1.add(j2);j2.add(m2);
-/* Parent diagonal face B has center (0,0,0), normal (1,1,0)/sqrt2 in module coordinates.
-   Child bottom square face A center is (0,-s/2,0), normal (0,-1,0).
-   Rotate child so its A normal opposes B normal, then translate A center exactly onto B center.
-   This guarantees full-face coincidence. */
-const qAlign=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,-1,0),new THREE.Vector3(-1,-1,0).normalize());
-function placeJoint(j){j.position.set(0,0,0);j.quaternion.copy(qAlign);let localCenter=new THREE.Vector3(0,-s/2,0).applyQuaternion(j.quaternion);j.position.sub(localCenter)}
-placeJoint(j1);
-/* second joint is built in module-1 local frame by same face-to-face rule */
-j2.position.set(0,0,0);j2.quaternion.copy(qAlign);let cc=new THREE.Vector3(0,-s/2,0).applyQuaternion(j2.quaternion);j2.position.sub(cc);
-// visual translucent square at first mating face for debugging
-let face=new THREE.Mesh(new THREE.PlaneGeometry(depth,s*Math.SQRT2),faceMat);face.rotation.y=Math.PI/2;face.rotation.x=Math.PI/4;root.add(face);
-root.rotation.set(-.2,-.45,.05);root.position.set(-.5,0,0);
-function setAng(k,id){j1.rotation.z=k*Math.PI/2;j2.rotation.z=0;document.querySelector('#note').textContent=(k*90)+'°：黄色半透明面是关节面；两节应始终整面贴合，只绕面心转';document.querySelectorAll('.bar button').forEach(x=>x.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
-document.querySelector('#a').onclick=()=>setAng(0,'a');document.querySelector('#b').onclick=()=>setAng(1,'b');document.querySelector('#d').onclick=()=>setAng(2,'d');document.querySelector('#e').onclick=()=>setAng(3,'e');
-function resize(){let w=innerWidth,h=innerHeight-84;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.009;root.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(34,1,.1,150);cam.position.set(10,7,14);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x7b8389,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(5,9,7);dl.castShadow=true;sc.add(dl);
+let fl=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshStandardMaterial({color:0xe4e3df,roughness:.92}));fl.rotation.x=-Math.PI/2;fl.position.y=-2.5;fl.receiveShadow=true;sc.add(fl);
+const blue=new THREE.MeshPhysicalMaterial({color:0x15349d,roughness:.29,clearcoat:.25}),ivory=new THREE.MeshPhysicalMaterial({color:0xf3f0e7,roughness:.4,clearcoat:.12});
+const faceA=new THREE.MeshStandardMaterial({color:0xffcc32,transparent:true,opacity:.38,side:THREE.DoubleSide}),faceB=new THREE.MeshStandardMaterial({color:0xff6b3d,transparent:true,opacity:.38,side:THREE.DoubleSide});
+const a=1.18;
+/* Half-cube: cube [0,a]^3 cut by x+y<=a.
+   Cross-section in XY is right isosceles triangle with vertices (0,0),(a,0),(0,a).
+   Square leg face ENTRY: x=0. Square leg face EXIT: y=0.
+   These faces are perpendicular, exactly as the published Magic Snake model. */
+function halfCube(){
+ const v=[0,0,0, 0,a,0, a,0,0, 0,0,a, 0,a,a, a,0,a];
+ const id=[0,2,1, 3,4,5, 0,1,4,0,4,3, 0,3,5,0,5,2, 1,2,5,1,5,4];
+ let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g;
+}
+const G=halfCube(),root=new THREE.Group();sc.add(root),pivots=[],mods=[];
+/* Face-frame chaining.
+   Each module local ENTRY face is x=0, center (0,a/2,a/2), outward normal -X.
+   EXIT face is y=0, center (a/2,0,a/2), outward normal -Y.
+   To attach next module: its ENTRY face must coincide with current EXIT face, with opposing normals.
+   Base alignment maps child +X (inward from entry) to parent -Y (outward from exit). */
+function makeNode(i){
+ const pivot=new THREE.Group();pivots.push(pivot);
+ const mesh=new THREE.Mesh(G,i%2?ivory:blue);mesh.castShadow=true;mesh.receiveShadow=true;mods.push(mesh);pivot.add(mesh);
+ return pivot;
+}
+const entryCenter=new THREE.Vector3(0,a/2,a/2),exitCenter=new THREE.Vector3(a/2,0,a/2);
+const qBase=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),new THREE.Vector3(0,-1,0));
+let parent=root;
+for(let i=0;i<24;i++){
+ const node=makeNode(i);
+ if(i===0){parent.add(node)}
+ else{
+   // parent is a frame located at previous exit face center and oriented like previous module
+   parent.add(node);
+   node.quaternion.copy(qBase);
+   const ec=entryCenter.clone().applyQuaternion(node.quaternion);
+   node.position.copy(ec.multiplyScalar(-1)); // entry center lands on frame origin
+ }
+ // create a child frame exactly at THIS module's exit center in node-local coordinates
+ const exitFrame=new THREE.Group();exitFrame.position.copy(exitCenter);node.add(exitFrame);parent=exitFrame;
+}
+// center the long chain for straight view
+root.position.set(-7.2,1.1,0);root.rotation.set(-.25,-.55,.08);
+let debug=[];
+function clearDebug(){debug.forEach(x=>x.removeFromParent());debug=[]}
+function showFaces(){clearDebug();for(let i=6;i<=8;i++){let n=pivots[i];let p1=new THREE.Mesh(new THREE.PlaneGeometry(a,a),faceA);p1.position.set(0,a/2,a/2);p1.rotation.y=Math.PI/2;n.add(p1);debug.push(p1);let p2=new THREE.Mesh(new THREE.PlaneGeometry(a,a),faceB);p2.position.set(a/2,0,a/2);p2.rotation.x=Math.PI/2;n.add(p2);debug.push(p2)}}
+function straight(){pivots.forEach((p,i)=>{if(i>0)p.rotation.set(0,0,0)});clearDebug();document.querySelector('#note').textContent='直线：24 个单元仅靠正方形面中心 pin 串联';sel('s')}
+function twist(){straight();pivots[7].rotation.x=Math.PI/2;document.querySelector('#note').textContent='第 8 个连接面旋转 90°：后面所有模块作为一条链一起运动';sel('j')}
+function faces(){straight();showFaces();document.querySelector('#note').textContent='黄色/橙色标出第 7–9 节的两个互相垂直正方形连接面';sel('v')}
+function sel(id){document.querySelectorAll('.bar button').forEach(b=>b.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
+document.querySelector('#s').onclick=straight;document.querySelector('#j').onclick=twist;document.querySelector('#v').onclick=faces;
+function resize(){let w=innerWidth,h=innerHeight-84;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.008;root.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
 </script></body></html>
