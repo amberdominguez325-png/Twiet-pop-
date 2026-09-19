@@ -1,23 +1,35 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Twist Pop 3D</title><style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;overflow:hidden;background:linear-gradient(#f8fbfc,#dfe7ea);font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#17212b}header{height:84px;background:#ffffffed;position:fixed;z-index:5;top:0;left:0;right:0;padding:15px 18px;display:flex;justify-content:space-between;align-items:center}h1{font-size:25px;margin:0}.sub{font-size:12px;color:#6f7c85}.badge{background:#eef2f4;border-radius:16px;padding:9px 12px;font-weight:800}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.coach{position:fixed;z-index:6;top:101px;left:18px;right:18px;background:#fff;border-radius:18px;padding:12px 14px;text-align:center;font-weight:750;box-shadow:0 5px 18px #0001}.hint{position:fixed;z-index:6;bottom:28px;left:50%;transform:translateX(-50%);background:#17212b;color:#fff;border-radius:20px;padding:11px 16px;font-size:13px;white-space:nowrap}.pop{position:fixed;z-index:8;left:50%;top:48%;transform:translate(-50%,-50%) scale(.5);font-size:48px;font-weight:1000;opacity:0;pointer-events:none}.pop.on{animation:p .7s}.target{position:fixed;z-index:7;width:62px;height:62px;border:4px solid #ffd43b;border-radius:50%;left:50%;top:51%;transform:translate(-50%,-50%);animation:ring .9s infinite;pointer-events:none}.hand{position:fixed;z-index:7;left:52%;top:53%;font-size:40px;animation:h 1.2s infinite;pointer-events:none}@keyframes ring{50%{width:78px;height:78px;box-shadow:0 0 0 13px #ffd43b44}}@keyframes h{50%{transform:translate(55px,-30px)}}@keyframes p{0%{opacity:0}35%{opacity:1;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}</style></head><body><header><div><h1>TWIST POP · 3D</h1><div class="sub">像掰真实魔尺一样玩</div></div><div class="badge">教学关</div></header><div class="coach" id="coach">按住发光关节，向右拖动，把后半条魔尺掰过去</div><canvas id="c"></canvas><div class="target" id="target"></div><div class="hand" id="hand">☝️</div><div class="pop" id="pop">POP!</div><div class="hint">空白处拖动 = 转动视角</div>
-<script type="module">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake Model</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#f1f3f2;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:4;top:0;left:0;right:0;height:82px;background:#ffffffef;padding:15px 18px}h1{font-size:23px;margin:0}.sub{font-size:13px;color:#71808a;margin-top:4px}#c{position:absolute;inset:82px 0 0;width:100%;height:calc(100% - 82px);touch-action:none}.tip{position:fixed;z-index:5;bottom:26px;left:50%;transform:translateX(-50%);background:#182028;color:white;padding:10px 15px;border-radius:18px;white-space:nowrap;font-size:13px}</style></head><body><header><h1>TWIST POP · 魔尺模型测试</h1><div class="sub">先不做游戏，只确认：这东西第一眼是不是魔尺</div></header><canvas id="c"></canvas><div class="tip">单指拖动旋转视角 · 双指缩放</div><script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-const canvas=document.querySelector('#c'),coach=document.querySelector('#coach'),target=document.querySelector('#target'),hand=document.querySelector('#hand'),pop=document.querySelector('#pop');
-const R=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;
-const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(38,1,.1,100);camera.position.set(0,5.7,9);camera.lookAt(0,0,0);
-scene.add(new THREE.HemisphereLight(0xffffff,0x71808a,2.2));const dl=new THREE.DirectionalLight(0xffffff,3);dl.position.set(4,7,5);dl.castShadow=true;scene.add(dl);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshStandardMaterial({color:0xe8edef,roughness:.85}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.15;floor.receiveShadow=true;scene.add(floor);
-const colors=[0x3478e5,0xffcf3e,0x3478e5,0xef5b67,0x3478e5,0x55c67a];const root=new THREE.Group();scene.add(root);let pieces=[];
-function geom(){const s=new THREE.Shape();s.moveTo(-.72,-.62);s.lineTo(.72,0);s.lineTo(-.72,.62);s.closePath();return new THREE.ExtrudeGeometry(s,{depth:.72,bevelEnabled:true,bevelSize:.045,bevelThickness:.045,bevelSegments:2})}
-const G=geom();
-for(let i=0;i<6;i++){let m=new THREE.Mesh(G,new THREE.MeshPhysicalMaterial({color:colors[i],roughness:.27,metalness:.02,clearcoat:.35,clearcoatRoughness:.22}));m.castShadow=true;m.receiveShadow=true;m.geometry.computeVertexNormals();m.position.set((i-2.5)*1.13,0,-.36);m.rotation.z=i%2?Math.PI:0;root.add(m);pieces.push(m)}
-root.rotation.x=-.18;root.rotation.y=.18;
-const joint=new THREE.Mesh(new THREE.SphereGeometry(.18,24,16),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.3}));joint.position.set(.55,0,0);root.add(joint);
-let folding=false,startX=0,angle=0,done=false,orbit=false,lastX=0,lastY=0;
-function size(){let w=innerWidth,h=innerHeight-84;R.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',size);size();
-canvas.addEventListener('pointerdown',e=>{let nx=e.clientX/innerWidth,ny=(e.clientY-84)/(innerHeight-84);if(!done&&nx>.40&&nx<.68&&ny>.28&&ny<.68){folding=true;startX=e.clientX;canvas.setPointerCapture(e.pointerId);target.style.display='none';hand.style.display='none';coach.textContent='对，就是这个关节。继续向右掰 →';}else{orbit=true;lastX=e.clientX;lastY=e.clientY}});
-canvas.addEventListener('pointermove',e=>{if(folding){let dx=Math.max(0,Math.min(150,e.clientX-startX));angle=dx/150*Math.PI/2;for(let i=3;i<6;i++){let ox=(i-2.5)*1.13-.55,oz=0;pieces[i].position.x=.55+Math.cos(angle)*ox;pieces[i].position.z=-.36-Math.sin(angle)*ox;pieces[i].rotation.y=-angle;pieces[i].rotation.z=i%2?Math.PI:0}}else if(orbit){root.rotation.y+=(e.clientX-lastX)*.008;root.rotation.x+=(e.clientY-lastY)*.004;lastX=e.clientX;lastY=e.clientY}});
-canvas.addEventListener('pointerup',e=>{if(folding){folding=false;if(angle>.72){angle=Math.PI/2;finish()}else resetFold()}orbit=false});
-function resetFold(){angle=0;for(let i=3;i<6;i++){pieces[i].position.set((i-2.5)*1.13,0,-.36);pieces[i].rotation.set(0,0,i%2?Math.PI:0)}target.style.display='block';hand.style.display='block';coach.textContent='差一点。按住发光关节，明显向右拖动。'}
-function finish(){done=true;for(let i=3;i<6;i++){let ox=(i-2.5)*1.13-.55;pieces[i].position.x=.55;pieces[i].position.z=-.36-ox;pieces[i].rotation.y=-Math.PI/2;pieces[i].rotation.z=i%2?Math.PI:0}coach.textContent='咔！整段真的绕关节转过去了。';setTimeout(()=>{coach.textContent='这一折让 3 个蓝色碰到一起 → POP！';pop.classList.add('on');[0,2,4].forEach(i=>{pieces[i].scale.set(.01,.01,.01)});setTimeout(()=>{coach.textContent='蓝色消失，剩下的魔尺重新接起来——整条变短。';let keep=[pieces[1],pieces[3],pieces[5]];keep.forEach((m,j)=>{m.position.set((j-1)*1.13,0,-.36);m.rotation.set(0,0,j%2?Math.PI:0)});joint.visible=false},650)},700)}
-function anim(){requestAnimationFrame(anim);R.render(scene,camera)}anim();
+const cv=document.querySelector('#c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(34,1,.1,100);cam.position.set(7,6.5,10);cam.lookAt(0,0,0);
+scene.add(new THREE.HemisphereLight(0xffffff,0x879098,2.4));let d=new THREE.DirectionalLight(0xffffff,3.2);d.position.set(4,8,6);d.castShadow=true;scene.add(d);
+let floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshStandardMaterial({color:0xe8e9e7,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.65;floor.receiveShadow=true;scene.add(floor);
+const snake=new THREE.Group();scene.add(snake);
+// A wedge is a triangular prism: triangular end profile extruded along Z.
+// Rotate 90° around Y so the prism's long axis runs along X, producing the chunky magic-snake module.
+function wedgeGeometry(){
+ const sh=new THREE.Shape(); sh.moveTo(-.72,-.72); sh.lineTo(.72,-.72); sh.lineTo(-.72,.72); sh.closePath();
+ const g=new THREE.ExtrudeGeometry(sh,{depth:1.42,bevelEnabled:true,bevelSegments:2,bevelSize:.025,bevelThickness:.025});
+ g.translate(0,0,-.71); g.rotateY(Math.PI/2); g.computeVertexNormals(); return g;
+}
+const wg=wedgeGeometry(), blue=new THREE.MeshPhysicalMaterial({color:0x173eaa,roughness:.3,clearcoat:.22}), white=new THREE.MeshPhysicalMaterial({color:0xf5f2e8,roughness:.42,clearcoat:.12});
+const n=12, step=1.38;
+for(let i=0;i<n;i++){
+ let m=new THREE.Mesh(wg,i%2?white:blue);m.castShadow=true;m.receiveShadow=true;
+ m.position.x=(i-(n-1)/2)*step;
+ // alternating wedges mate into a continuous rectangular snake, like a physical Rubik's Snake
+ m.rotation.x=(i%2)*Math.PI;
+ snake.add(m);
+ // thin seam line emphasizes hidden hinge rather than giant visible joint
+ if(i<n-1){let seam=new THREE.Mesh(new THREE.BoxGeometry(.025,1.48,1.48),new THREE.MeshStandardMaterial({color:0x5b6470,roughness:.8}));seam.position.x=(i-(n-1)/2)*step+step/2;snake.add(seam)}
+}
+snake.rotation.y=-.20;snake.rotation.z=.04;
+// floor shadow contact
+function resize(){let w=innerWidth,h=innerHeight-82;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);
+let drag=false,lx=0,ly=0,dist=0;
+cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drag)return;snake.rotation.y+=(e.clientX-lx)*.009;snake.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});
+cv.addEventListener('pointerup',()=>drag=false);
+cv.addEventListener('wheel',e=>{cam.position.multiplyScalar(e.deltaY>0?1.08:.92);cam.lookAt(0,0,0)},{passive:true});
+function animate(){requestAnimationFrame(animate);R.render(scene,cam)}animate();
 </script></body></html>
