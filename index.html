@@ -1,56 +1,19 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake Correct Geometry</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#edf0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:21px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:99px;left:16px;right:16px;background:#fff;border-radius:16px;padding:10px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:20px;left:14px;right:14px;display:flex;gap:7px}.bar button{flex:1;border:0;border-radius:15px;padding:12px 4px;background:#fff;font-weight:800;box-shadow:0 4px 15px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>标准 Magic Snake 几何验证</h1><div class="sub">半立方体单元 · 两个互相垂直的正方形 leg faces · 面心 pin 连接</div></header><div class="note" id="note">直线：24 个半立方体通过正方形面首尾相接</div><canvas id="c"></canvas><div class="bar"><button id="s" class="on">直线</button><button id="j">拧第 8 节</button><button id="v">看连接面</button></div><script type="module">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Magic Snake Unit</title><style>*{box-sizing:border-box}body{margin:0;overflow:hidden;background:#edf0ef;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#182028}header{position:fixed;z-index:5;top:0;left:0;right:0;height:84px;background:#fffffff2;padding:14px 18px}h1{margin:0;font-size:21px}.sub{font-size:12px;color:#687680;margin-top:4px}#c{position:absolute;inset:84px 0 0;width:100%;height:calc(100% - 84px);touch-action:none}.note{position:fixed;z-index:6;top:99px;left:16px;right:16px;background:#fff;border-radius:16px;padding:10px;text-align:center;font-size:13px}.bar{position:fixed;z-index:6;bottom:20px;left:14px;right:14px;display:flex;gap:8px}.bar button{flex:1;border:0;border-radius:15px;padding:12px 4px;background:#fff;font-weight:800;box-shadow:0 4px 15px #0002}.bar .on{background:#182028;color:#fff}</style></head><body><header><h1>魔尺 · 单节/两节结构验收</h1><div class="sub">先不生成 24 节：把一个半立方体和“正方形面对面”连接看清楚</div></header><div class="note" id="note">单节：一个立方体沿面对角线切半，得到直角等腰三角棱柱</div><canvas id="c"></canvas><div class="bar"><button id="one" class="on">单节</button><button id="two">两节贴合</button><button id="turn">第二节转 90°</button></div><script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-const cv=document.querySelector('#c'),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.shadowMap.enabled=true;ren.outputColorSpace=THREE.SRGBColorSpace;
-const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(34,1,.1,150);cam.position.set(10,7,14);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x7b8389,2.5));let dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(5,9,7);dl.castShadow=true;sc.add(dl);
-let fl=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshStandardMaterial({color:0xe4e3df,roughness:.92}));fl.rotation.x=-Math.PI/2;fl.position.y=-2.5;fl.receiveShadow=true;sc.add(fl);
-const blue=new THREE.MeshPhysicalMaterial({color:0x15349d,roughness:.29,clearcoat:.25}),ivory=new THREE.MeshPhysicalMaterial({color:0xf3f0e7,roughness:.4,clearcoat:.12});
-const faceA=new THREE.MeshStandardMaterial({color:0xffcc32,transparent:true,opacity:.38,side:THREE.DoubleSide}),faceB=new THREE.MeshStandardMaterial({color:0xff6b3d,transparent:true,opacity:.38,side:THREE.DoubleSide});
-const a=1.18;
-/* Half-cube: cube [0,a]^3 cut by x+y<=a.
-   Cross-section in XY is right isosceles triangle with vertices (0,0),(a,0),(0,a).
-   Square leg face ENTRY: x=0. Square leg face EXIT: y=0.
-   These faces are perpendicular, exactly as the published Magic Snake model. */
-function halfCube(){
- const v=[0,0,0, 0,a,0, a,0,0, 0,0,a, 0,a,a, a,0,a];
- const id=[0,2,1, 3,4,5, 0,1,4,0,4,3, 0,3,5,0,5,2, 1,2,5,1,5,4];
- let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();return g;
-}
-const G=halfCube(),root=new THREE.Group();sc.add(root),pivots=[],mods=[];
-/* Face-frame chaining.
-   Each module local ENTRY face is x=0, center (0,a/2,a/2), outward normal -X.
-   EXIT face is y=0, center (a/2,0,a/2), outward normal -Y.
-   To attach next module: its ENTRY face must coincide with current EXIT face, with opposing normals.
-   Base alignment maps child +X (inward from entry) to parent -Y (outward from exit). */
-function makeNode(i){
- const pivot=new THREE.Group();pivots.push(pivot);
- const mesh=new THREE.Mesh(G,i%2?ivory:blue);mesh.castShadow=true;mesh.receiveShadow=true;mods.push(mesh);pivot.add(mesh);
- return pivot;
-}
-const entryCenter=new THREE.Vector3(0,a/2,a/2),exitCenter=new THREE.Vector3(a/2,0,a/2);
-const qBase=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),new THREE.Vector3(0,-1,0));
-let parent=root;
-for(let i=0;i<24;i++){
- const node=makeNode(i);
- if(i===0){parent.add(node)}
- else{
-   // parent is a frame located at previous exit face center and oriented like previous module
-   parent.add(node);
-   node.quaternion.copy(qBase);
-   const ec=entryCenter.clone().applyQuaternion(node.quaternion);
-   node.position.copy(ec.multiplyScalar(-1)); // entry center lands on frame origin
- }
- // create a child frame exactly at THIS module's exit center in node-local coordinates
- const exitFrame=new THREE.Group();exitFrame.position.copy(exitCenter);node.add(exitFrame);parent=exitFrame;
-}
-// center the long chain for straight view
-root.position.set(-7.2,1.1,0);root.rotation.set(-.25,-.55,.08);
-let debug=[];
-function clearDebug(){debug.forEach(x=>x.removeFromParent());debug=[]}
-function showFaces(){clearDebug();for(let i=6;i<=8;i++){let n=pivots[i];let p1=new THREE.Mesh(new THREE.PlaneGeometry(a,a),faceA);p1.position.set(0,a/2,a/2);p1.rotation.y=Math.PI/2;n.add(p1);debug.push(p1);let p2=new THREE.Mesh(new THREE.PlaneGeometry(a,a),faceB);p2.position.set(a/2,0,a/2);p2.rotation.x=Math.PI/2;n.add(p2);debug.push(p2)}}
-function straight(){pivots.forEach((p,i)=>{if(i>0)p.rotation.set(0,0,0)});clearDebug();document.querySelector('#note').textContent='直线：24 个单元仅靠正方形面中心 pin 串联';sel('s')}
-function twist(){straight();pivots[7].rotation.x=Math.PI/2;document.querySelector('#note').textContent='第 8 个连接面旋转 90°：后面所有模块作为一条链一起运动';sel('j')}
-function faces(){straight();showFaces();document.querySelector('#note').textContent='黄色/橙色标出第 7–9 节的两个互相垂直正方形连接面';sel('v')}
-function sel(id){document.querySelectorAll('.bar button').forEach(b=>b.classList.remove('on'));document.querySelector('#'+id).classList.add('on')}
-document.querySelector('#s').onclick=straight;document.querySelector('#j').onclick=twist;document.querySelector('#v').onclick=faces;
-function resize(){let w=innerWidth,h=innerHeight-84;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(!drag)return;root.rotation.y+=(e.clientX-lx)*.008;root.rotation.x+=(e.clientY-ly)*.006;lx=e.clientX;ly=e.clientY});cv.addEventListener('pointerup',()=>drag=false);(function loop(){requestAnimationFrame(loop);ren.render(sc,cam)})();
+const cv=document.querySelector('#c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(34,1,.1,50);cam.position.set(4.8,3.8,6.4);cam.lookAt(0,0,0);sc.add(new THREE.HemisphereLight(0xffffff,0x77818a,2.6));let dl=new THREE.DirectionalLight(0xffffff,3);dl.position.set(4,7,5);dl.castShadow=true;sc.add(dl);
+const root=new THREE.Group();sc.add(root);const blue=new THREE.MeshStandardMaterial({color:0x17369f,roughness:.32}),white=new THREE.MeshStandardMaterial({color:0xf5f2e8,roughness:.4}),yellow=new THREE.MeshBasicMaterial({color:0xffc928,transparent:true,opacity:.42,side:THREE.DoubleSide});
+const s=1.7;function half(){const v=[0,0,0,0,s,0,s,0,0,0,0,s,0,s,s,s,0,s],id=[0,2,1,3,4,5,0,1,4,0,4,3,0,3,5,0,5,2,1,2,5,1,5,4];let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(id);g.computeVertexNormals();g.translate(-s/2,-s/2,-s/2);return g}const G=half();
+let A=new THREE.Mesh(G,blue),B=new THREE.Mesh(G,white);A.castShadow=B.castShadow=true;root.add(A);root.add(B);
+let plane=new THREE.Mesh(new THREE.PlaneGeometry(s,s),yellow);root.add(plane);
+function state(n){A.visible=true;B.visible=n>0;plane.visible=n>0;A.position.set(-.85,0,0);A.rotation.set(0,0,0);
+ // A's x=+s/2 square leg face and B's x=-s/2 square leg face coincide at x=0.
+ B.position.set(.85,0,0);B.rotation.set(0,0,n===2?Math.PI/2:0);
+ // Rotate B about center of its entry square face x=-s/2, not about object center.
+ if(n===2){const pivot=new THREE.Group();root.remove(B);root.add(pivot);pivot.position.set(0,0,0);B.position.set(s/2,0,0);pivot.add(B);pivot.rotation.x=Math.PI/2}
+ plane.position.set(0,0,0);plane.rotation.y=Math.PI/2;
+ document.querySelector('#note').textContent=n===0?'单节：半立方体本体':n===1?'两节：黄色正方形就是两节完全重合的连接面':'旋转：第二节绕黄色正方形面的中心法线转 90°';
+ ['one','two','turn'].forEach((id,i)=>document.querySelector('#'+id).classList.toggle('on',i===n))}
+document.querySelector('#one').onclick=()=>location.reload();document.querySelector('#two').onclick=()=>state(1);document.querySelector('#turn').onclick=()=>state(2);state(0);
+root.rotation.set(-.28,-.55,.08);function resize(){let w=innerWidth,h=innerHeight-84;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}resize();addEventListener('resize',resize);let drag=false,x=0,y=0;cv.onpointerdown=e=>{drag=true;x=e.clientX;y=e.clientY};cv.onpointermove=e=>{if(!drag)return;root.rotation.y+=(e.clientX-x)*.009;root.rotation.x+=(e.clientY-y)*.006;x=e.clientX;y=e.clientY};cv.onpointerup=()=>drag=false;(function loop(){requestAnimationFrame(loop);R.render(sc,cam)})();
 </script></body></html>
